@@ -33,11 +33,11 @@ const user = new mongoose.Schema({
     additonalDetails:{
         type:mongoose.Schema.Types.ObjectId,
         required:true,
-        ref:"Profile"
+        ref:"additionalDetails"
     },
     courses:[{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"Courses"
+        ref:"course"
     }],
     courseProgress:[{
         type:mongoose.Schema.Types.ObjectId,
