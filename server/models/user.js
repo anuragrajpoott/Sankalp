@@ -41,8 +41,12 @@ const user = new mongoose.Schema({
     }],
     courseProgress:[{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"CourseProgress"
+        ref:"courseProgress"
     }],
+    otp:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"otp"
+    }
 });
 
 module.exports = mongoose.model("user",user)

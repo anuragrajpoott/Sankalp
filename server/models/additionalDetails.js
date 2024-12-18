@@ -10,7 +10,7 @@ const additonalDetails = new mongoose.Schema({
     contactNo:{
         type:String,
     },
-    About:{
+    about:{
         type:String,
         trim:true,
     },
