@@ -46,7 +46,10 @@ const user = new mongoose.Schema({
     otp:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"otp"
-    }
+    },
+    token: {
+        type: String
+    },
 });
 
 module.exports = mongoose.model("user",user)

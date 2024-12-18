@@ -5,12 +5,6 @@ const otp = new mongoose.Schema({
     email: {
         type: String
     },
-    token: {
-        type: String
-    },
-    resetPasswordExpires: {
-        type: Date,
-    },
     otp: {
         type: String
     },
