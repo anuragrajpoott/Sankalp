@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const mailSender = require("../utils/mailSender");
+const {mailSender} = require("../utils/mailSender");
 
 const otp = new mongoose.Schema({
     email: {
@@ -15,20 +15,14 @@ const otp = new mongoose.Schema({
     }
 });
 
-// async function sendVerificationEmail(email, otp) {
-//     try {
-//         const mailResponce = await mailSender(email, "verification email form sankalp", otp)
-//     } catch (error) {
-//         console.log(error)
-
-//     }
-// }
 
 otp.pre("save", async function (next) {
-    // await sendVerificationEmail(this.email, this.otp);
+
     try {
-        // const mailResponce = 
-        await mailSender(email, "verification email form sankalp", otp)
+       const mailResponce = await mailSender(this.email, "verification email form sankalp",this.otp)
+    
+      
+
     } catch (error) {
         console.log(error)
 

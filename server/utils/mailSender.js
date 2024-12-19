@@ -1,17 +1,14 @@
 
 const nodemailer = require("nodemailer")
 
-
 exports.mailSender = async (email, subject, body) => {
-    let transporter = () => {
-        nodemailer.createTransport({
+    let transporter = nodemailer.createTransport({
                 host:process.env.MAIL_HOST,
                 auth:{
                     user:process.env.MAIL_USER,
                     pass:process.env.MAIL_PASS
                 }
             })
-        }
     try {
         let info = await transporter.sendMail({
             from: "Sankalp",
