@@ -6,7 +6,7 @@ const {
     updateSubSection,
     deleteSubSection,
   } = require("../controllers/subSection")
-  const { auth, isInstructor} = require("../middleware/auth")
+  const { auth, isInstructor} = require("../middlewares/auth")
 
   router.post("/updateSubSection", auth, isInstructor, updateSubSection)
  

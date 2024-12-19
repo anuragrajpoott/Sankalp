@@ -1,4 +1,4 @@
-const { transporter } = require("../config/nodemailer")
+
 const nodemailer = require("nodemailer")
 
 

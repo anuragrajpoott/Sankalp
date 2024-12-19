@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const additonalDetails = new mongoose.Schema({
+const additionalDetails = new mongoose.Schema({
     gender:{
         type : String, 
     },

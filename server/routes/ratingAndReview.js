@@ -5,7 +5,7 @@ const {
     getAverageRating,
     getAllRatingAndReview,
   } = require("../controllers/ratingandReview")
-  const { auth, isStudent } = require("../middleware/auth")
+  const { auth, isStudent } = require("../middlewares/auth")
 
   
 router.post("/createRating", auth, isStudent, createRating)

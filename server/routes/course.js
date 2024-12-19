@@ -5,7 +5,7 @@ const {
   showAllCourses,
   getCourseDetails,
 } = require("../controllers/course")
-const { auth, isInstructor} = require("../middleware/auth")
+const { auth, isInstructor} = require("../middlewares/auth")
 
 // const {
 //   updateCourseProgress,

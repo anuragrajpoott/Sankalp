@@ -1,15 +1,15 @@
 const express = require("express")
 const router = express.Router()
 const {
-    showAllCategories,
+  showAllCategory,
     createCategory,
     categoryPageDetails,
   } = require("../controllers/category")
-  const { auth, isAdmin } = require("../middleware/auth")
+  const { auth, isAdmin } = require("../middlewares/auth")
 
   router.post("/createCategory", auth, isAdmin, createCategory)
 
-  router.get("/showAllCategories", showAllCategories)
+  router.get("/showAllCategories", showAllCategory)
 
   router.post("/getCategoryPageDetails", categoryPageDetails)
 

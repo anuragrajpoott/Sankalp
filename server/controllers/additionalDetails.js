@@ -1,5 +1,5 @@
 const User = require("../models/user")
-const Profile = require("../models/profile");
+const Profile = require("../models/additionalDetails");
 const { findById } = require("../models/otp");
 
 exports.updateAdditionalDetails = async(req,res)=>{

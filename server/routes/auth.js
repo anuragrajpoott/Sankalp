@@ -6,7 +6,7 @@ const {
   sendOtp,
   changePassword,
 } = require("../controllers/auth")
-const { auth } = require("../middleware/auth")
+const { auth } = require("../middlewares/auth")
 
 
 router.post("/logIn", logIn)
