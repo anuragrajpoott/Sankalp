@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const dbConnect = require("./configs/database");
+const {cdConnect} = require("./utils/fileUploader")
 require("dotenv").config();
 
 app.use(express.json());
@@ -14,4 +15,6 @@ app.get("/",(req,res)=>{
 })
 
 dbConnect();
+cdConnect();
+
 

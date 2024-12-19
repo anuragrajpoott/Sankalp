@@ -1,5 +1,5 @@
-const Section = require("../models/Section");
-const Course = require("../models/Course")
+const section = require("../models/section")
+const course = require("../models/course")
 
 exports.createSection = async (req,res) => {
    try {
@@ -7,17 +7,15 @@ exports.createSection = async (req,res) => {
     if(!sectionName||!sectionDescription){
         return res.status(400).json({
             success:false,
-            message:"fill all entries"
+            message:"fill all  sectoin entries"
         })
     }
-    const newSection = await Section.create({sectionName})
-    const updatedCourseDetails = await Course.findByIdAndUpdate({courseId},{
+    const newSection = await section.create({sectionName})
+    const updatedCourseDetails = await course.findByIdAndUpdate({courseId},{
         $push:{
             courseContent:newSection._id
         }
     },{new:true})
-
-    //populate something...
 
     res.status(200).json({
         success:true,
@@ -40,14 +38,16 @@ exports.updateSection = async(req,res)=>{
         if(!sectionName||!sectionId){
             return res.status(400).json({
                 success:false,
-                message:"fill all entries"
+                message:"fill all section entries"
             })
         }  
-        const newSection = await Course.findByIdAndUpdate(sectionId,{sectionName},{new:true})
+        const updatedSection = await course.findByIdAndUpdate(sectionId,{
+            sectionName
+        },{new:true})
         res.status(200).json({
             success:true,
             message:"section updated successfully",
-            newSection
+            updatedSection
         })
     } catch (error) {
         res.status(400).json({
@@ -61,7 +61,7 @@ exports.updateSection = async(req,res)=>{
 exports.deleteSection = async(req,res)=>{
     try {
         const {sectionId} = req.params;
-        await Section.findByIdAndDelete(sectionId);
+        await section.findByIdAndDelete(sectionId);
         res.status(200).json({
             success:true,
             message:"section deleted successfully",

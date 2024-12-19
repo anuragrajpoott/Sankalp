@@ -1,7 +1,7 @@
 const user = require("../models/user")
 const category = require("../models/category")
 const course = require("../models/course")
-const cloudinaryUpload = require("..//utils/file")
+const fileUpload = require("../utils/fileUploader")
 
 
 exports.createCourse = async (req,res) => {
@@ -23,7 +23,7 @@ exports.createCourse = async (req,res) => {
                     message:"user not found while creating course"
                 })
                     } 
-        const categoryDetails = await User.findById(tag);
+        const categoryDetails = await User.findById(category);
         if(!categoryDetails){
               return res.status(400).json({
                             success:false,
@@ -31,7 +31,7 @@ exports.createCourse = async (req,res) => {
                         })
                     }
 
-                    const newthumbnailImage = await cloudinaryUpload(thumbnailImage,process.env.FOLDER_NAME)
+                    const newthumbnailImage = await fileUpload(thumbnailImage,process.env.FOLDER_NAME)
 
                     const newCourse = await course.create({
                         courseName,
@@ -40,7 +40,7 @@ exports.createCourse = async (req,res) => {
                         whatWillYouLearn,
                         price,
                         category:categoryDetails._id,
-                        thumbnailImage:thumbnailImage.secure_url
+                        thumbnailImage:newthumbnailImage.secure_url
                     })
 
                     await user.findByIdAndUpdate({id:InstructorDetails._id},{
