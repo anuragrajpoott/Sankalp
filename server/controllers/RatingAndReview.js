@@ -1,5 +1,5 @@
-const RatingAndReview = require("../models/RatingandReview")
-const Course = require("../models/Course")
+const ratingAndReview = require("../models/ratingAndReview")
+const course = require("../models/course")
 const mongoose = require("mongoose")
 
 // Create a new rating and review
@@ -10,7 +10,7 @@ exports.createRating = async (req, res) => {
 
     // Check if the user is enrolled in the course
 
-    const courseDetails = await Course.findOne({
+    const courseDetails = await course.findOne({
       _id: courseId,
       studentsEnroled: { $elemMatch: { $eq: userId } },
     })
@@ -23,7 +23,7 @@ exports.createRating = async (req, res) => {
     }
 
     // Check if the user has already reviewed the course
-    const alreadyReviewed = await RatingAndReview.findOne({
+    const alreadyReviewed = await ratingAndReview.findOne({
       user: userId,
       course: courseId,
     })
@@ -36,7 +36,7 @@ exports.createRating = async (req, res) => {
     }
 
     // Create a new rating and review
-    const ratingReview = await RatingAndReview.create({
+    const newRatingAndReview = await ratingAndReview.create({
       rating,
       review,
       course: courseId,
@@ -44,9 +44,9 @@ exports.createRating = async (req, res) => {
     })
 
     // Add the rating and review to the course
-    await Course.findByIdAndUpdate(courseId, {
+    await course.findByIdAndUpdate(courseId, {
       $push: {
-        ratingAndReviews: ratingReview,
+        ratingAndReviews: newRatingAndReview,
       },
     })
     await courseDetails.save()
@@ -54,81 +54,80 @@ exports.createRating = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "Rating and review created successfully",
-      ratingReview,
+      newRatingAndReview,
     })
   } catch (error) {
     console.error(error)
     return res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Internal server error while creating rating",
       error: error.message,
     })
   }
 }
 
-// Get the average rating for a course
 exports.getAverageRating = async (req, res) => {
   try {
     const courseId = req.body.courseId
 
-    // Calculate the average rating using the MongoDB aggregation pipeline
-    const result = await RatingAndReview.aggregate([
+    const averageRating = await ratingAndReview.aggregate([
       {
         $match: {
-          course: new mongoose.Types.ObjectId(courseId), // Convert courseId to ObjectId
+          course: new mongoose.Types.ObjectId({courseId})
         },
       },
       {
         $group: {
           _id: null,
-          averageRating: { $avg: "$rating" },
+          averageRating: { 
+            $avg: "rating"
+           },
         },
       },
     ])
 
-    if (result.length > 0) {
+    if (averageRating.length > 0) {
       return res.status(200).json({
         success: true,
-        averageRating: result[0].averageRating,
+        averageRating: averageRating[0].averageRating,
       })
     }
-
-    // If no ratings are found, return 0 as the default rating
     return res.status(200).json({ success: true, averageRating: 0 })
+
   } catch (error) {
     console.error(error)
     return res.status(500).json({
       success: false,
-      message: "Failed to retrieve the rating for the course",
+      message: "Failed to retrieve the average rating for the course",
       error: error.message,
     })
   }
 }
 
-// Get all rating and reviews
-exports.getAllRatingReview = async (req, res) => {
+
+exports.getAllRatingAndReview = async (req, res) => {
   try {
-    const allReviews = await RatingAndReview.find({})
+    const allRatingAndReview = await ratingAndReview.find({})
       .sort({ rating: "desc" })
       .populate({
         path: "user",
-        select: "firstName lastName email image", // Specify the fields you want to populate from the "Profile" model
+        select: "firstName lastName email image",
       })
       .populate({
         path: "course",
-        select: "courseName", //Specify the fields you want to populate from the "Course" model
+        select: "courseName",
       })
       .exec()
 
     res.status(200).json({
       success: true,
-      data: allReviews,
+      data: allRatingAndReview,
     })
   } catch (error) {
     console.error(error)
     return res.status(500).json({
       success: false,
-      message: "Failed to retrieve the rating and review for the course",
+      message: "Failed to retrieve all the rating and review for the course",
       error: error.message,
     })
   }
