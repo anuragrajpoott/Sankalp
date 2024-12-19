@@ -25,7 +25,7 @@ const course = new mongoose.Schema({
     price: {
         type: Number
     },
-    thumbnail: {
+    thumbnailImage: {
         type: string
     },
     studentsEnrolled: [{

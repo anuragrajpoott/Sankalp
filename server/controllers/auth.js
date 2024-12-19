@@ -94,7 +94,7 @@ exports.signUp = async (req, res) => {
             About: null,
             contactNumber: null
         })
-        const newUser = await user.create({ firstName, lastName, email, contactNumber, password: hashedPassword, accountType, additonalDetails: profileDetails_id, image: null });
+        const newUser = await user.create({ firstName, lastName, email, contactNumber, password: hashedPassword, accountType, additonalDetails: newAdditionalDetails._id, image: null });
         res.json({
             success: true,
             message: "user registered successfully",
@@ -120,8 +120,8 @@ exports.login = async (req, res) => {
                 success: false,
                 message: "fill all login details"
             })
-            const newUser = await user.findOne({ email });
-            if (!user) {
+            const existingUser = await user.findOne({ email });
+            if (!existingUser) {
                 res.status(0).json({
                     success: false,
                     message: "user not registered"
@@ -145,7 +145,7 @@ exports.login = async (req, res) => {
                         httpOnly: true
                     }
 
-                    User.cookie("token", token, options).status(200).json({
+                    user.cookie("token", token, options).status(200).json({
                         success: true,
                         token, user,
                         message: "logged in succesfully"
@@ -172,7 +172,7 @@ exports.login = async (req, res) => {
 }
 
 
-exports.resetPassword = async (req, res) => {
+exports.changePassword = async (req, res) => {
     try {
         const { email, oldPassword, newPassword } = req.body;
         if (!email) {
@@ -181,11 +181,11 @@ exports.resetPassword = async (req, res) => {
                 message: "enter email"
             })
         }
-        const user = await user.findOne({ email });
-        if (!user) {
+        const existingUser = await user.findOne({ email });
+        if (!existingUser) {
             res.status(0).json({
                 success: false,
-                message: "enter valid email"
+                message: "useer does not exist"
             })
         }
         if (await bcrypt.compare(oldPassword, user.password)) {
