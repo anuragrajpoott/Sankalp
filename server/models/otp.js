@@ -1,12 +1,14 @@
 const mongoose = require("mongoose");
 const {mailSender} = require("../utils/mailSender");
+const otpTemplate = require("../mailTemplates/emailVerificationTemplate")
 
 const otp = new mongoose.Schema({
     email: {
         type: String
     },
     otp: {
-        type: String
+        type: String,
+        required:true
     },
     createdAt: {
         type: Date,
@@ -19,9 +21,7 @@ const otp = new mongoose.Schema({
 otp.pre("save", async function (next) {
 
     try {
-       const mailResponce = await mailSender(this.email, "verification email form sankalp",this.otp)
-    
-      
+       await mailSender(this.email, "verification email form sankalp",otpTemplate(otp))
 
     } catch (error) {
         console.log(error)
@@ -29,5 +29,6 @@ otp.pre("save", async function (next) {
     }
     next();
 })
+
 
 module.exports = mongoose.model("otp", otp)

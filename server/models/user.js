@@ -28,7 +28,6 @@ const user = new mongoose.Schema({
     },
     profileImage:{
         type:String,
-        required:true,
     }, 
     additonalDetails:{
         type:mongoose.Schema.Types.ObjectId,

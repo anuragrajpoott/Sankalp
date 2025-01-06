@@ -3,6 +3,7 @@ const otp = require("../models/otp")
 const otpGenerator = require("otp-generator")
 const bcrypt = require("bcrypt");
 const additionalDetails = require("../models/additionalDetails");
+const { mailSender } = require("../utils/mailSender");
 require("dotenv").config();
 
 exports.sendOtp = async (req, res) => {
@@ -18,14 +19,15 @@ exports.sendOtp = async (req, res) => {
             })
         }
 
-        var otp = otpGenerator.generate(6, {
+        var newOtp = otpGenerator.generate(6, {
             upperCaseAlphabets: false,
             lowerCaseAlphabets: false,
             specialChars: false
 
         })
 
-        await otp.create({ email, otp });
+       let otpDetails = await otp.create({ email, otp : newOtp });
+       console.log(otpDetails)
 
         res.status(200).json({
             success: true,
@@ -46,9 +48,9 @@ exports.sendOtp = async (req, res) => {
 
 exports.signUp = async (req, res) => {
     try {
-        const { firstName, lastName, email, password } = req.body;
+        const { firstName, lastName, email, password , newOtp, accountType} = req.body;
 
-        if (!firstName || !lastName || !email || !password) {
+        if (!firstName || !lastName || !email || !password || !accountType || !newOtp) {
             return res.status(400).json({
                 success: false,
                 message: "fill all signup details"
@@ -62,29 +64,19 @@ exports.signUp = async (req, res) => {
             })
         }
 
-        const newOtp = await otp.find({ email }).sort({ createdAt: -1 }).limit(1);
+        const existingOtp = await otp.find({ email }).sort({ createdAt: -1 }).limit(1);
 
-        if (newOtp.length == 0) {
+        if (existingOtp.length == 0) {
             return res.status(400).json({
                 success: false,
                 message: "invalid otp"
             })
         }
-        else if (newOtp != otp) {
+        else if (newOtp !== existingOtp[0].otp) {
             return res.status(400).json({
                 success: false,
                 message: "invalid otp"
             })
-        }
-
-        try {
-           let hashedPassword = await bcrypt.hash(password, 10);
-        } catch (error) {
-            return res.status(500).json({
-                success: false,
-                message: "error while hashing password"
-            })
-
         }
 
         const newAdditionalDetails = await additionalDetails.create({
@@ -93,7 +85,11 @@ exports.signUp = async (req, res) => {
             About: null,
             contactNumber: null
         })
-        const newUser = await user.create({ firstName, lastName, email, contactNumber, password: hashedPassword, accountType, additonalDetails: newAdditionalDetails._id, image: null });
+
+
+        let hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = await user.create({ firstName, lastName, email, password : hashedPassword, accountType, additonalDetails: newAdditionalDetails._id, profileImage: null });
         res.json({
             success: true,
             message: "user registered successfully",

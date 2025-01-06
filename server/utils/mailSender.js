@@ -7,15 +7,17 @@ exports.mailSender = async (email, subject, body) => {
                 auth:{
                     user:process.env.MAIL_USER,
                     pass:process.env.MAIL_PASS
-                }
+                },
+                secure:false
             })
     try {
-        let info = await transporter.sendMail({
+        await transporter.sendMail({
             from: "Sankalp",
             to: `${email}`,
             subject: `${subject}`,
-            body: `${body}`
+            html: `${body}`
         })
+
     }catch (error) {
         console.log(error)
 
