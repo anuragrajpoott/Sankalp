@@ -1,16 +1,16 @@
 const express = require("express");
-const dbConnect = require("./configs/database");
+const dbConnect = require("./server/configs/database");
 const fileUpload = require("express-fileupload");
-const {cdConnect} = require("./utils/fileUploader")
+const {cdConnect} = require("./server/utils/fileUploader")
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-const authRoutes = require("./routes/auth");
-const additionalDetailsRoutes = require("./routes/additionalDetails");
-const courseRoutes = require("./routes/course");
-const categoryRoutes = require("./routes/category");
-const sectionRoutes = require("./routes/section");
-const subSectionRoutes = require("./routes/subSection");
-const ratingandReviewRoutes = require("./routes/ratingAndReview");
+const authRoutes = require("./server/routes/auth");
+const additionalDetailsRoutes = require("./server/routes/additionalDetails");
+const courseRoutes = require("./server/routes/course");
+const categoryRoutes = require("./server/routes/category");
+const sectionRoutes = require("./server/routes/section");
+const subSectionRoutes = require("./server/routes/subSection");
+const ratingandReviewRoutes = require("./server/routes/ratingAndReview");
 require("dotenv").config();
 
 const app = express();

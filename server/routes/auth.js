@@ -9,12 +9,12 @@ const {
 const { auth } = require("../middlewares/auth")
 
 
-router.post("/logIn", logIn)
+router.post("/log-in", logIn)
 
-router.post("/signUp", signUp)
+router.post("/sign-up", signUp)
 
-router.post("/sendOtp", sendOtp)
+router.post("/send-otp", sendOtp)
 
-router.post("/changePassword", auth, changePassword)
+router.post("/change-password", auth, changePassword)
 
 module.exports = router

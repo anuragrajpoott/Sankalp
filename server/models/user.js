@@ -47,7 +47,8 @@ const user = new mongoose.Schema({
         ref:"otp"
     },
     token: {
-        type: String
+        type: String,
+        createdAt: Date.now()
     },
 });
 

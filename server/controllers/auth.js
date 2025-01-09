@@ -4,6 +4,7 @@ const otpGenerator = require("otp-generator")
 const bcrypt = require("bcrypt");
 const additionalDetails = require("../models/additionalDetails");
 const { mailSender } = require("../utils/mailSender");
+const jwt = require("jsonwebtoken")
 require("dotenv").config();
 
 exports.sendOtp = async (req, res) => {
@@ -26,8 +27,8 @@ exports.sendOtp = async (req, res) => {
 
         })
 
-       let otpDetails = await otp.create({ email, otp : newOtp });
-       console.log(otpDetails)
+        await otp.create({ email, otp : newOtp });
+   
 
         res.status(200).json({
             success: true,
@@ -48,7 +49,7 @@ exports.sendOtp = async (req, res) => {
 
 exports.signUp = async (req, res) => {
     try {
-        const { firstName, lastName, email, password , newOtp, accountType} = req.body;
+        const {accountType, firstName, lastName, email, password , newOtp } = req.body;
 
         if (!firstName || !lastName || !email || !password || !accountType || !newOtp) {
             return res.status(400).json({
@@ -109,63 +110,64 @@ exports.signUp = async (req, res) => {
 
 exports.logIn = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password } = req.body
+    
         if (!email || !password) {
-            res.status().json({
-                success: false,
-                message: "fill all login details"
-            })
-            const existingUser = await user.findOne({ email });
-            if (!existingUser) {
-                res.status(0).json({
-                    success: false,
-                    message: "user not registered"
-                })
-
-                const payload = {
-                    email: user.email,
-                    id: user._id,
-                    role: user.accountType
-                }
-                if (await bcrypt.compare(password, user.password)) {
-                    let token = jwt.sign(payload, process.env.JWT, {
-                        expiresIn: "2h"
-                    })
-
-                    user.token = token;
-                    user.password = undefined;
-
-                    const options = {
-                        expiresIn: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-                        httpOnly: true
-                    }
-
-                    user.cookie("token", token, options).status(200).json({
-                        success: true,
-                        token, user,
-                        message: "logged in succesfully"
-                    })
-
-                }
-                else {
-                    res.status(0).json({
-                        status: false,
-                        message: "error due to wrong password"
-                    })
-                }
-            }
-        }
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({
+          return res.status(400).json({
             success: false,
-            message: "error while loging in"
+            message: `Please Fill up All the Log In Required Fields`,
+          })
+        }
+        const existingUser = await user.findOne({ email })
+
+        //populate additonal details
+    
+        if (!existingUser) {
+          return res.status(401).json({
+            success: false,
+            message: `User is not Registered with Us Please SignUp to Continue`,
+          })
+        }
+
+
+    if (await bcrypt.compare(password, existingUser.password)) {
+          const token = jwt.sign(
+            { email: existingUser.email, id: existingUser._id, accountType: existingUser.accountType },
+            process.env.JWT_SECRET,
+            {
+              expiresIn: "24h",
+            }
+          )
+          existingUser.token = token
+          existingUser.password = undefined
+          const options = {
+            expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+            httpOnly: true,
+          }
+          res.cookie("token", token, options).status(200).json({
+            success: true,
+            existingUser,
+            token,
+            message: `User Login Success`,
+          })
+
+        } else {
+          return res.status(401).json({
+            success: false,
+            message: `Password is incorrect`,
+          })
+        }
+
+
+      } catch (error) {
+        console.error(error)
+        console.log(error)
+        return res.status(500).json({
+          success: false,
+          message: `Login Failure Please Try Again, ${error.message}`,
         })
-
+      }
     }
-
-}
-
 
 exports.changePassword = async (req, res) => {
     try {
@@ -202,3 +204,99 @@ exports.changePassword = async (req, res) => {
 
     }
 }
+
+
+exports.sendResetPasswordLink = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "enter email"
+            })
+        }
+        const existingUser = await user.findOne({ email });
+        if (!existingUser) {
+            res.status(0).json({
+                success: false,
+                message: "useer does not exist"
+            })
+        }
+
+
+        const token = crypto.randomBytes(20).toString("hex")
+
+        const updatedDetails = await user.findOneAndUpdate(
+          { email: email },
+          { token: token,},
+          { new: true }
+        )
+    
+        const url = process.env.URL + `/forgot-password/${token}`
+    
+        await mailSender(
+          email,
+          "Password Reset Link",
+          `Your Link for email verification is ${url}. Please click this url to reset your password.`
+        )
+
+
+        res.status(200).json({
+            success: true,
+            message: "reset password mail sent successfully"
+        })
+
+
+
+    } catch (error) {
+        res.status(400).json({
+            success:false,
+            message:"error while resetting password"
+        })
+
+    }
+}
+
+
+exports.resetPassword = async (req, res) => {
+    try {
+      const { password, confirmPassword, token } = req.body
+  
+      if (confirmPassword !== password) {
+        return res.json({
+          success: false,
+          message: "Password and Confirm Password Does not Match",
+        })
+      }
+      const userDetails = await user.findOne({ token: token })
+      if (!userDetails) {
+        return res.json({
+          success: false,
+          message: "Token is Invalid",
+        })
+      }
+      if (!(userDetails.token.createdAt + 5*60*1000 > Date.now())) {
+        return res.status(403).json({
+          success: false,
+          message: `Token is Expired, Please Regenerate Your Token`,
+        })
+      }
+      const hashedPassword = await bcrypt.hash(password, 10)
+      await User.findOneAndUpdate(
+        { token: token },
+        { password: hashedPassword },
+        { new: true }
+      )
+      res.json({
+        success: true,
+        message: `Password Reset Successful`,
+      })
+    } catch (error) {
+      return res.json({
+        error: error.message,
+        success: false,
+        message: `Some Error in resetting the Password`,
+      })
+    }
+  }
+  

@@ -21,7 +21,7 @@ const otp = new mongoose.Schema({
 otp.pre("save", async function (next) {
 
     try {
-       await mailSender(this.email, "verification email form sankalp",otpTemplate(otp))
+       await mailSender(this.email, "verification email form sankalp",otpTemplate(this.otp))
 
     } catch (error) {
         console.log(error)
