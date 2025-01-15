@@ -5,6 +5,8 @@ const {
   signUp,
   sendOtp,
   changePassword,
+  sendResetPasswordLink,
+  resetPassword,
 } = require("../controllers/auth")
 const { auth } = require("../middlewares/auth")
 
@@ -16,5 +18,9 @@ router.post("/sign-up", signUp)
 router.post("/send-otp", sendOtp)
 
 router.post("/change-password", auth, changePassword)
+
+router.post("/forgot-password/token",sendResetPasswordLink)
+
+router.post("/reset-password",resetPassword)
 
 module.exports = router

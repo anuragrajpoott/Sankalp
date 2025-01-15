@@ -48,7 +48,8 @@ const user = new mongoose.Schema({
     },
     token: {
         type: String,
-        createdAt: Date.now()
+        createdAt: { type: Date, expires: 5*60*1000, default: Date.now }
+
     },
 });
 

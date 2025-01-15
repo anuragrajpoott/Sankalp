@@ -6,6 +6,7 @@ const additionalDetails = require("../models/additionalDetails");
 const { mailSender } = require("../utils/mailSender");
 const jwt = require("jsonwebtoken")
 require("dotenv").config();
+const crypto = require("crypto")
 
 exports.sendOtp = async (req, res) => {
     try {
@@ -233,6 +234,7 @@ exports.sendResetPasswordLink = async (req, res) => {
         )
     
         const url = process.env.URL + `/forgot-password/${token}`
+        console.log(url)
     
         await mailSender(
           email,
@@ -243,15 +245,16 @@ exports.sendResetPasswordLink = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: "reset password mail sent successfully"
+            message: `reset password mail sent successfully...`
         })
 
 
 
     } catch (error) {
+      console.log(error)
         res.status(400).json({
             success:false,
-            message:"error while resetting password"
+            message:"error while resetting password sending link,"
         })
 
     }
@@ -260,14 +263,8 @@ exports.sendResetPasswordLink = async (req, res) => {
 
 exports.resetPassword = async (req, res) => {
     try {
-      const { password, confirmPassword, token } = req.body
+      const { password, token } = req.body
   
-      if (confirmPassword !== password) {
-        return res.json({
-          success: false,
-          message: "Password and Confirm Password Does not Match",
-        })
-      }
       const userDetails = await user.findOne({ token: token })
       if (!userDetails) {
         return res.json({
@@ -275,14 +272,14 @@ exports.resetPassword = async (req, res) => {
           message: "Token is Invalid",
         })
       }
-      if (!(userDetails.token.createdAt + 5*60*1000 > Date.now())) {
+      if (!userDetails.token) {
         return res.status(403).json({
           success: false,
           message: `Token is Expired, Please Regenerate Your Token`,
         })
       }
       const hashedPassword = await bcrypt.hash(password, 10)
-      await User.findOneAndUpdate(
+      await user.findOneAndUpdate(
         { token: token },
         { password: hashedPassword },
         { new: true }
