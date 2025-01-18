@@ -7,6 +7,7 @@ const { mailSender } = require("../utils/mailSender");
 const jwt = require("jsonwebtoken")
 require("dotenv").config();
 const crypto = require("crypto")
+const {contactUsEmail} = require("../mailTemplates/contactFormRes")
 
 exports.sendOtp = async (req, res) => {
     try {
@@ -84,14 +85,16 @@ exports.signUp = async (req, res) => {
         const newAdditionalDetails = await additionalDetails.create({
             gender: null,
             dateOfBirth: null,
-            About: null,
+            about: null,
             contactNumber: null
         })
 
 
         let hashedPassword = await bcrypt.hash(password, 10);
 
-        const newUser = await user.create({ firstName, lastName, email, password : hashedPassword, accountType, additonalDetails: newAdditionalDetails._id, profileImage: null });
+        const newProfileImage = `https://api.dicebear.com/9.x/initials/svg?seed=${firstName}%${lastName}`
+
+        const newUser = await user.create({ firstName, lastName, email, password : hashedPassword, accountType, additionalDetails: newAdditionalDetails._id, profileImage: newProfileImage  });
         res.json({
             success: true,
             message: "user registered successfully",
@@ -119,7 +122,7 @@ exports.logIn = async (req, res) => {
             message: `Please Fill up All the Log In Required Fields`,
           })
         }
-        const existingUser = await user.findOne({ email })
+        const existingUser = await user.findOne({ email }).populate("additionalDetails")
 
         //populate additonal details
     
@@ -169,42 +172,6 @@ exports.logIn = async (req, res) => {
         })
       }
     }
-
-exports.changePassword = async (req, res) => {
-    try {
-        const { email, oldPassword, newPassword } = req.body;
-        if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "enter email"
-            })
-        }
-        const existingUser = await user.findOne({ email });
-        if (!existingUser) {
-            res.status(0).json({
-                success: false,
-                message: "useer does not exist"
-            })
-        }
-        if (await bcrypt.compare(oldPassword, user.password)) {
-            newHashedPassword = await bcrypt.hash(newPassword, 10);
-            await user.create({ password: newHashedPassword });
-        }
-        res.status(200).json({
-            success: true,
-            message: "password changed successfully"
-        })
-
-
-
-    } catch (error) {
-        res.status(400).json({
-            success:false,
-            message:"error while resetting password"
-        })
-
-    }
-}
 
 
 exports.sendResetPasswordLink = async (req, res) => {
@@ -297,3 +264,35 @@ exports.resetPassword = async (req, res) => {
     }
   }
   
+
+
+
+  exports.contactUs = async (req,res) => {
+    try {
+      const { email , message } = req.body
+
+      const senderResponce = await mailSender(
+        email,
+        "confirmation email",
+        contactUsEmail(email,  message,)
+      )
+
+      const recieverResponce = await mailSender(
+        "anuragrajpoot2468@gmail.com",
+        "new contact details",
+        `${email} says ${message}`
+
+      )
+
+      return res.json({
+        success: true,
+        message: "contact successfull",
+      })
+    } catch (error) {
+      return res.json({
+        error: error.message,
+        success: false,
+        message: `error while contacting`,
+      })
+    }
+  }

@@ -7,7 +7,7 @@ const additionalDetails = new mongoose.Schema({
     dateOfBirth:{
         type:String,
     },
-    contactNo:{
+    contactNumber:{
         type:String,
     },
     about:{

@@ -37,7 +37,7 @@ app.listen(process.env.PORT,()=>{
 })
 
 app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/addtionaldetails", additionalDetailsRoutes);
+app.use("/api/v1/additionalDetails", additionalDetailsRoutes);
 app.use("/api/v1/course", courseRoutes);
 app.use("/api/v1/category", categoryRoutes);
 app.use("/api/v1/section", sectionRoutes);

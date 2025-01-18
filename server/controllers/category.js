@@ -32,16 +32,17 @@ exports.createCategory = async(req,res)=>{
 
 exports.showAllCategory = async (req,res) => {
     try {
-        const allCategory = await Tags.find({},{name:true,desctription:true})
+        const allCategory = await category.find({},{name:true,desctription:true})
         res.status(200).json({
             success:true,
             message:"showing all category",
             allCategory
         })
     } catch (error) {
+      console.log(error)
         res.status(400).json({
             success:false,
-            message:"error while showing all category"
+            message:`error while showing all category... ${error}`
         })
     }
 }
